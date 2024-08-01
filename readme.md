@@ -93,3 +93,18 @@ Load Test Passed
 Successful Iterations: 2000 (100.00%, 1000/second) avg: 3.252416ms, min: 804.419µs, max: 25.595585ms
 Full logs: /tmp/f1-testFranzKafkaProducer-fc45-2024-08-01_21-19-14.log
 ```
+
+## Usage 
+
+```bash
+# build project
+make build
+# run app
+make start
+
+# run test
+make franz-test-api
+make confluent-test-api
+make franz-test-kafka
+make confluent-test-kafka
+```
