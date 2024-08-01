@@ -6,16 +6,20 @@ This project uses two Go libraries for interacting with Kafka clusters: confluen
 ### Libraries
 **confluent-kafka-go** is a Go client for Kafka that is maintained by Confluent. It provides a high-level API for producing and consuming messages and is widely used in the Go community for its comprehensive feature set and reliability.
 
+* Go wrapper around the librdkafka C library, which is a highly optimized, feature-rich library for Apache Kafka.
 * High-performance producer and consumer
-* Support for Kafka features like transactions, exactly-once semantics, and more
+* Rich Configuration Options
 * Comprehensive documentation and community support
 
 **franz-go**
 franz-go is an idiomatic Go client for Kafka designed for performance and simplicity. It is a relatively new library but offers a range of features for producing and consuming Kafka messages efficiently.
 
+* Native Go Implementation which can be advantageous in terms of deployment simplicity and understanding the library's internals
 * Efficient, high-throughput producer and consumer
-* Built with Go idioms in mind, providing a more native Go experience
-* Lightweight and performant
+* Designed to be lightweight, with a focus on minimal overhead and efficient use of resources. 
+* Focuses on core producer and consumer functionality with stability and ease of use.
+
+
 
 ## Performance Testing with F1
 I used F1 to conduct performance tests for both APIs and Kafka producers. The tests were performed under the following conditions:

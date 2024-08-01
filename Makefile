@@ -14,4 +14,4 @@ build:
 	docker-compose down && docker-compose build --no-cache && docker-compose up
 
 start:
-	go run cmd/main.go
+	docker build -t myapp . && docker run --rm --network host myapp
