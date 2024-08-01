@@ -1,14 +1,14 @@
 franz-test-api:
-	go run ./f1/main.go run constant -r 1000/s -d 2s testAPIWithFranzKafka
+	docker build -f test.Dockerfile -t test . && docker run --rm --network host test run constant -r 1000/s -d 2s testAPIWithFranzKafka
 
 confluent-test-api:
-	go run ./f1/main.go run constant -r 1000/s -d 2s testAPIWithConfluentKafka
+	gdocker build -f test.Dockerfile -t test . && docker run --rm --network host test run constant -r 1000/s -d 2s testAPIWithConfluentKafka
 
 franz-test-kafka:
-	go run ./f1/main.go run constant -r 1000/s -d 2s testFranzKafkaProducer 
+	docker build -f test.Dockerfile -t test . && docker run --rm --network host test run constant -r 1000/s -d 2s testFranzKafkaProducer 
 
 confluent-test-kafka:
-	go run ./f1/main.go run constant -r 1000/s -d 2s testConfluentKafkaProducer
+	docker build -f test.Dockerfile -t test . && docker run --rm --network host test run constant -r 1000/s -d 2s testConfluentKafkaProducer
 
 build:
 	docker-compose down && docker-compose build --no-cache && docker-compose up

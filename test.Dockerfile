@@ -1,20 +1,16 @@
-# Use the official Golang image as the base image
+# Start from a base Go image
 FROM golang:1.22
-
-# Set the Current Working Directory inside the container
+# Set the working directory inside the container
 WORKDIR /app
 
-# Copy go mod and sum files
-COPY go.mod go.sum ./
-
-# Download all dependencies
-RUN GOPROXY="https://goproxy.io" go mod download
-
-# Copy the source from the current directory to the Working Directory inside the container
+# Copy the entire project into the container
 COPY . .
 
-# Build the Go app
-RUN go build -o main /app/f1/main.go
+# Install any Go modules necessary for the project
+RUN go mod download
 
-# Command to run the executable
-CMD ["/app/main","run","constant","-r","1000/s","-d","2s","testAPIWithFranzKafka"]
+# Build the main Go application
+RUN go build -o test /app/f1/main.go
+
+# Default command to run when the container starts (can be overridden)
+ENTRYPOINT ["/app/test"]
