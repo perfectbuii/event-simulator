@@ -26,7 +26,7 @@ I used F1 to conduct performance tests for both APIs and Kafka producers. The te
 
 This setup allowed us to evaluate the performance and efficiency of each library under comparable conditions.
 
-**Benchmark Results**
+### Benchmark Results
 
 **APIs**
 
@@ -59,6 +59,8 @@ Load Test Passed
 Successful Iterations: 2000 (100.00%, 1000/second) avg: 24.802233ms, min: 4.1639ms, max: 57.724944ms
 Full logs: /tmp/f1-testAPIWithFranzKafka-69bc-2024-08-01_21-17-49.log
 ```
+
+
 
 **Kafka Producers**
 
