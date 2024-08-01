@@ -1,0 +1,4 @@
+{
+    "schema": "{\"type\":\"record\",\"name\":\"UserEvent\",\"fields\":[{\"name\":\"user_id\",\"type\":\"string\",\"default\":\"\"},{\"name\":\"event_type\",\"type\":\"string\",\"default\":\"\"},{\"name\":\"timestamp\",\"type\":\"string\",\"default\":\"\"}]}"
+}
+  

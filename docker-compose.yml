@@ -1,0 +1,99 @@
+version: '3.8'
+services:
+  redpanda:
+    image: docker.redpanda.com/vectorized/redpanda:latest
+    container_name: redpanda
+    ports:
+      - "29092:29092"
+      - "9092:9092"  # Kafka port
+      - "8081:8081"  # Schema Registry port
+      - "8082:8082"  # Pandaproxy port
+    command:
+      - redpanda
+      - start
+      - --overprovisioned
+      - --smp 1
+      - --memory 1G
+      - --reserve-memory 0M
+      - --node-id 0
+      - --check=false
+      - --kafka-addr PLAINTEXT://0.0.0.0:29092,OUTSIDE://0.0.0.0:9092
+      - --advertise-kafka-addr PLAINTEXT://redpanda:29092,OUTSIDE://localhost:9092
+      - --pandaproxy-addr 0.0.0.0:8082
+      - --advertise-pandaproxy-addr localhost:8082
+      - --schema-registry-addr http://redpanda:8081
+      - --set
+      - redpanda.kafka_api_tls={"name":"OUTSIDE","enabled":true,"require_client_auth":true,"cert_file":"/etc/redpanda/certs/broker.crt","key_file":"/etc/redpanda/certs/broker.key","truststore_file":"/etc/redpanda/certs/ca.crt"}
+      - --set
+      - redpanda.admin_api_tls={"name":"OUTSIDE","enabled":true,"require_client_auth":true,"cert_file":"/etc/redpanda/certs/broker.crt","key_file":"/etc/redpanda/certs/broker.key","truststore_file":"/etc/redpanda/certs/ca.crt"}
+    networks:
+      - kafka-network
+    volumes:
+      - ./certs:/etc/redpanda/certs:ro
+    healthcheck:
+      test: ["CMD", "rpk", "cluster", "info", "--brokers=localhost:9092","--tls-cert=/etc/redpanda/certs/broker.crt", "--tls-key=/etc/redpanda/certs/broker.key","--tls-truststore=/etc/redpanda/certs/ca.crt"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  kafka-setup:
+    image: docker.redpanda.com/vectorized/redpanda:latest
+    container_name: kafka-setup
+    depends_on:
+      redpanda:
+        condition: service_healthy
+    volumes:
+      - ./create-topics.sh:/create-topics.sh
+      - ./register-schema.sh:/register-schema.sh
+      - ./order-schema.json:/order-schema.json
+      - ./user-schema.json:/user-schema.json
+    environment:
+      KAFKA_BROKERS: "redpanda:29092"
+      USER_EVENTS_TOPIC: "user-events"
+      ORDER_EVENTS_TOPIC: "order-events"
+      SCHEMA_REGISTRY_URL: "http://redpanda:8081"
+    entrypoint: ["sh", "-c", "sh /create-topics.sh && /register-schema.sh"]
+    networks:
+      - kafka-network
+
+  # myapp:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "8080:8080"
+  #   environment:
+  #     KAFKA_BROKERS: "redpanda:29092"
+  #     USER_EVENTS_TOPIC: "user-events"
+  #     ORDER_EVENTS_TOPIC: "order-events"
+  #     SCHEMA_REGISTRY_URL: "http://redpanda:8081"
+  #   depends_on:
+  #     redpanda:
+  #       condition: service_healthy
+  #   networks:
+  #     - kafka-network
+
+  console:
+    image: docker.redpanda.com/redpandadata/console:v2.6.0
+    restart: on-failure
+    entrypoint: /bin/sh
+    command: -c "echo \"$$CONSOLE_CONFIG_FILE\" > /tmp/config.yml; /app/console"
+    environment:
+      CONFIG_FILEPATH: /tmp/config.yml
+      CONSOLE_CONFIG_FILE: |
+        kafka:
+          brokers: ["redpanda:29092"]
+          schemaRegistry:
+            enabled: true
+            urls: ["http://redpanda:8081"]
+    ports:
+      - "8086:8080"
+    depends_on:
+      redpanda:
+        condition: service_healthy
+    networks:
+      - kafka-network
+
+networks:
+  kafka-network:
+    driver: bridge
