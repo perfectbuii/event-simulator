@@ -1,266 +1,96 @@
-### [Event Simulator] - Franz-go Kafka Client Documentation
+## Kafka Client Libraries Comparison
 
-## Overview
-This project utilizes the `franz-go` Kafka client library to interact with Kafka clusters. `franz-go` is a performant, idiomatic Go client for Kafka that supports high-throughput producers and consumers, transactions, and TLS encryption.
+### Overview
+This project uses two Go libraries for interacting with Kafka clusters: confluent-kafka-go and franz-go. Both libraries provide robust functionality for Kafka clients but differ in their features and performance characteristics.
 
-## Table of Contents
-- Installation
-- Configuration
-  - Client Configuration
-  - TLS Configuration
-- Basic Usage
-  - Producing Messages
-  - Consuming Messages
-- Securing with TLS
-  - Generate Certificates
-  - Configure TLS in franz-go
-- Examples
-  - Producing a Simple Message
-  - Consuming Messages from a Topic
-- Troubleshooting
-  - Common Errors and Solutions
-  - Debugging Tips
-- Contributing
-- License
+### Libraries
+**confluent-kafka-go**
+confluent-kafka-go is a Go client for Kafka that is maintained by Confluent. It provides a high-level API for producing and consuming messages and is widely used in the Go community for its comprehensive feature set and reliability.
 
-## Installation
-To start using `franz-go`, you need to install the package in your Go project. You can do this using `go get`.
+Key Features:
+High-performance producer and consumer
+Support for Kafka features like transactions, exactly-once semantics, and more
+Comprehensive documentation and community support
 
-```go 
-go get github.com/twmb/franz-go/pkg/kgo
+**franz-go**
+franz-go is an idiomatic Go client for Kafka designed for performance and simplicity. It is a relatively new library but offers a range of features for producing and consuming Kafka messages efficiently.
+
+Key Features:
+Efficient, high-throughput producer and consumer
+Built with Go idioms in mind, providing a more native Go experience
+Lightweight and performant
+Performance Benchmarks
+We conducted performance tests using f1 to benchmark APIs and Kafka producers implemented with these libraries.
+
+## Performance Testing with F1
+I used F1 to conduct performance tests for both APIs and Kafka producers. The tests were performed under the following conditions:
+
+**Payload Size**: Identical payload sizes were used for both the APIs and Kafka producers to ensure consistency.
+**Throughput**: The tests simulated a load of 1000 requests per second.
+**Duration**: Each test was conducted over a duration of 2 seconds.
+
+This setup allowed us to evaluate the performance and efficiency of each library under comparable conditions.
+
+**Benchmark Results**
+
+**APIs**
+confluent-kafka-go API: api/v1/user-event
+```bash
+F1 Load Tester
+Running testAPIWithConfluentKafka scenario for 2s at a rate of 1000/s constant rate, using distribution regular.
+
+[   1s]  ✔  1000  ✘     0 (1000/s)   avg: 54.815027ms, min: 12.732776ms, max: 63.062858ms
+[   2s]  Max Duration Elapsed - waiting for active tests to complete
+[Teardown] ✔
+
+Load Test Passed
+2000 iterations started in 1.99124155s (1000/second)
+Successful Iterations: 2000 (100.00%, 1000/second) avg: 54.031079ms, min: 10.733743ms, max: 63.062858ms
+Full logs: /tmp/f1-testAPIWithConfluentKafka-789b-2024-08-01_21-18-14.log
 ```
 
+franz-go API: api/v1/order-event
+```bash
+F1 Load Tester
+Running testAPIWithFranzKafka scenario for 2s at a rate of 1000/s constant rate, using distribution regular.
 
-## Configuration
+[   1s]  ✔  1000  ✘     0 (1000/s)   avg: 26.664394ms, min: 5.130325ms, max: 57.724944ms
+[   2s]  Max Duration Elapsed - waiting for active tests to complete
+[Teardown] ✔
 
-### Client Configuration
-Create a Kafka client with your desired configuration options. Here's a basic example:
-
-```go
-package main
-
-import (
-    "github.com/twmb/franz-go/pkg/kgo"
-    "log"
-)
-
-func main() {
-    client, err := kgo.NewClient(
-        kgo.SeedBrokers("localhost:9092"),
-        kgo.ConsumerGroup("example-group"),
-        kgo.ConsumeTopics("example-topic"),
-    )
-    if err != nil {
-        log.Fatalf("Error creating Kafka client: %v", err)
-    }
-    defer client.Close()
-}
+Load Test Passed
+2000 iterations started in 1.990963465s (1000/second)
+Successful Iterations: 2000 (100.00%, 1000/second) avg: 24.802233ms, min: 4.1639ms, max: 57.724944ms
+Full logs: /tmp/f1-testAPIWithFranzKafka-69bc-2024-08-01_21-17-49.log
 ```
 
-### TLS Configuration
-If your Kafka cluster is secured with TLS, you'll need to configure your client to use the appropriate certificates.
+**Kafka Producers**
+confluent-kafka-go Producer
+```bash
+F1 Load Tester
+Running testConfluentKafkaProducer scenario for 2s at a rate of 1000/s constant rate, using distribution regular.
 
-```go
-package main
+[   1s]  ✔  1000  ✘     0 (1000/s)   avg: 51.651617ms, min: 46.42722ms, max: 89.650031ms
+[   2s]  Max Duration Elapsed - waiting for active tests to complete
+[Teardown] ✔
 
-import (
-    "crypto/tls"
-    "crypto/x509"
-    "log"
-    "os"
-
-    "github.com/twmb/franz-go/pkg/kgo"
-)
-
-func main() {
-    client, err := kgo.NewClient(
-        kgo.SeedBrokers("localhost:9092"),
-        kgo.DialTLSConfig(&tls.Config{
-            RootCAs: mustLoadCACerts("certs/ca-cert.pem"),
-            Certificates: []tls.Certificate{mustLoadClientCert("certs/server-cert.pem", "certs/server-key.pem")},
-        }),
-    )
-    if err != nil {
-        log.Fatalf("Error creating Kafka client: %v", err)
-    }
-    defer client.Close()
-}
-
-func mustLoadCACerts(caPath string) *x509.CertPool {
-    caCert, err := os.ReadFile(caPath)
-    if err != nil {
-        log.Fatalf("Failed to read CA certificate: %v", err)
-    }
-    pool := x509.NewCertPool()
-    if !pool.AppendCertsFromPEM(caCert) {
-        log.Fatalf("Failed to append CA certificate to pool")
-    }
-    return pool
-}
-
-func mustLoadClientCert(certPath, keyPath string) tls.Certificate {
-    cert, err := tls.LoadX509KeyPair(certPath, keyPath)
-    if err != nil {
-        log.Fatalf("Failed to load client certificate: %v", err)
-    }
-    return cert
-}
-
+Load Test Passed
+2000 iterations started in 1.990825929s (1000/second)
+Successful Iterations: 2000 (100.00%, 1000/second) avg: 49.643657ms, min: 46.351818ms, max: 89.650031ms
+Full logs: /tmp/f1-testConfluentKafkaProducer-f3d5-2024-08-01_21-18-44.log
 ```
 
+franz-go Producer
+```bash
+F1 Load Tester
+Running testFranzKafkaProducer scenario for 2s at a rate of 1000/s constant rate, using distribution regular.
 
-## Basic Usage
+[   1s]  ✔  1000  ✘     0 (1000/s)   avg: 4.505458ms, min: 954.733µs, max: 25.595585ms
+[   2s]  Max Duration Elapsed - waiting for active tests to complete
+[Teardown] ✔
 
-### Producing Messages
-Producing messages to a Kafka topic is straightforward. Below is a simple example of how to produce a message using `franz-go`.
-
-```go
-package main
-
-import (
-    "context"
-    "github.com/twmb/franz-go/pkg/kgo"
-    "log"
-)
-
-func produceMessage(client *kgo.Client, topic string, key, value []byte) {
-    record := &kgo.Record{
-        Topic: topic,
-        Key:   key,
-        Value: value,
-    }
-    err := client.ProduceSync(context.Background(), record).FirstErr()
-    if err != nil {
-        log.Fatalf("Failed to produce message: %v", err)
-    } else {
-        log.Println("Message produced successfully")
-    }
-}
-
+Load Test Passed
+2000 iterations started in 1.990659875s (1000/second)
+Successful Iterations: 2000 (100.00%, 1000/second) avg: 3.252416ms, min: 804.419µs, max: 25.595585ms
+Full logs: /tmp/f1-testFranzKafkaProducer-fc45-2024-08-01_21-19-14.log
 ```
-
-
-### Consuming Messages
-Here's a simple example of consuming messages using `franz-go`.
-
-```go
-package main
-
-import (
-    "context"
-    "log"
-    "github.com/twmb/franz-go/pkg/kgo"
-)
-
-func consumeMessages(client *kgo.Client) {
-    ctx := context.Background()
-
-    for {
-        fetches := client.PollFetches(ctx)
-        fetches.EachPartition(func(p kgo.FetchTopicPartition) {
-            for _, record := range p.Records {
-                log.Printf("Received message from topic %s: key=%s value=%s", record.Topic, string(record.Key), string(record.Value))
-            }
-        })
-    }
-}
-
-```
-
-### Examples
-
-**Producing a Simple Message**
-
-```go 
-package main
-
-import (
-    "context"
-    "github.com/twmb/franz-go/pkg/kgo"
-    "log"
-)
-
-func main() {
-    client, err := kgo.NewClient(
-        kgo.SeedBrokers("localhost:9092"),
-    )
-    if err != nil {
-        log.Fatalf("Error creating Kafka client: %v", err)
-    }
-    defer client.Close()
-
-    produceMessage(client, "example-topic", []byte("key"), []byte("value"))
-}
-
-func produceMessage(client *kgo.Client, topic string, key, value []byte) {
-    record := &kgo.Record{
-        Topic: topic,
-        Key:   key,
-        Value: value,
-    }
-    err := client.ProduceSync(context.Background(), record).FirstErr()
-    if err != nil {
-        log.Fatalf("Failed to produce message: %v", err)
-    } else {
-        log.Println("Message produced successfully")
-    }
-}
-
-```
-
-**Consuming Messages from a Topic**
-
-```go
-package main
-
-import (
-    "context"
-    "log"
-    "github.com/twmb/franz-go/pkg/kgo"
-)
-
-func main() {
-    client, err := kgo.NewClient(
-        kgo.SeedBrokers("localhost:9092"),
-        kgo.ConsumerGroup("example-group"),
-        kgo.ConsumeTopics("example-topic"),
-    )
-    if err != nil {
-        log.Fatalf("Error creating Kafka client: %v", err)
-    }
-    defer client.Close()
-
-    consumeMessages(client)
-}
-
-func consumeMessages(client *kgo.Client) {
-    ctx := context.Background()
-
-    for {
-        fetches := client.PollFetches(ctx)
-        fetches.EachPartition(func(p kgo.FetchTopicPartition) {
-            for _, record := range p.Records {
-                log.Printf("Received message from topic %s: key=%s value=%s", record.Topic, string(record.Key), string(record.Value))
-            }
-        })
-    }
-}
-
-```
-
-
-## Troubleshooting
-
-### Common Errors and Solutions
-- **Connection Errors:** Ensure your Kafka brokers are reachable from the client and the correct ports are open.
-- **TLS Issues:** Verify that your certificates are correctly configured and the paths in your code match your file system.
-
-### Debugging Tips
-- Use `kgo` client logging options to get detailed logs and debug information.
-- Ensure your Kafka broker is running and accessible.
-
-## Contributing
-Contributions are welcome! If you have suggestions for improvements or have found a bug, please open an issue or submit a pull request.
-
-## License
-This project is licensed under the MIT License. See the LICENSE file for details.

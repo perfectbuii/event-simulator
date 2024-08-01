@@ -35,8 +35,9 @@ func NewFranzKafkaProducer(brokers string, topic string) (*FranzKafkaProducer, e
 
 	// Set up TLS configuration
 	tlsConfig := &tls.Config{
-		Certificates: []tls.Certificate{cert},
-		RootCAs:      caCertPool,
+		Certificates:       []tls.Certificate{cert},
+		RootCAs:            caCertPool,
+		InsecureSkipVerify: true,
 	}
 
 	client, err := kgo.NewClient(
