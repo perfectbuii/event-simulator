@@ -15,3 +15,6 @@ build:
 
 start:
 	docker build -t myapp . && docker run --rm --network host myapp
+
+it:
+	docker build -f test.Dockerfile -t my-test-image . && docker run --rm --network host my-test-image
