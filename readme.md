@@ -4,37 +4,33 @@
 This project uses two Go libraries for interacting with Kafka clusters: confluent-kafka-go and franz-go. Both libraries provide robust functionality for Kafka clients but differ in their features and performance characteristics.
 
 ### Libraries
-**confluent-kafka-go**
-confluent-kafka-go is a Go client for Kafka that is maintained by Confluent. It provides a high-level API for producing and consuming messages and is widely used in the Go community for its comprehensive feature set and reliability.
+**confluent-kafka-go** is a Go client for Kafka that is maintained by Confluent. It provides a high-level API for producing and consuming messages and is widely used in the Go community for its comprehensive feature set and reliability.
 
-Key Features:
-High-performance producer and consumer
-Support for Kafka features like transactions, exactly-once semantics, and more
-Comprehensive documentation and community support
+* High-performance producer and consumer
+* Support for Kafka features like transactions, exactly-once semantics, and more
+* Comprehensive documentation and community support
 
 **franz-go**
 franz-go is an idiomatic Go client for Kafka designed for performance and simplicity. It is a relatively new library but offers a range of features for producing and consuming Kafka messages efficiently.
 
-Key Features:
-Efficient, high-throughput producer and consumer
-Built with Go idioms in mind, providing a more native Go experience
-Lightweight and performant
-Performance Benchmarks
-We conducted performance tests using f1 to benchmark APIs and Kafka producers implemented with these libraries.
+* Efficient, high-throughput producer and consumer
+* Built with Go idioms in mind, providing a more native Go experience
+* Lightweight and performant
 
 ## Performance Testing with F1
 I used F1 to conduct performance tests for both APIs and Kafka producers. The tests were performed under the following conditions:
 
-**Payload Size**: Identical payload sizes were used for both the APIs and Kafka producers to ensure consistency.
-**Throughput**: The tests simulated a load of 1000 requests per second.
-**Duration**: Each test was conducted over a duration of 2 seconds.
+* Payload Size: Identical payload sizes were used for both the APIs and Kafka producers to ensure consistency.
+* Throughput: The tests simulated a load of 1000 requests per second.
+* Duration: Each test was conducted over a duration of 2 seconds.
 
 This setup allowed us to evaluate the performance and efficiency of each library under comparable conditions.
 
 **Benchmark Results**
 
 **APIs**
-confluent-kafka-go API: api/v1/user-event
+
+* confluent-kafka-go API: api/v1/user-event
 ```bash
 F1 Load Tester
 Running testAPIWithConfluentKafka scenario for 2s at a rate of 1000/s constant rate, using distribution regular.
@@ -49,7 +45,7 @@ Successful Iterations: 2000 (100.00%, 1000/second) avg: 54.031079ms, min: 10.733
 Full logs: /tmp/f1-testAPIWithConfluentKafka-789b-2024-08-01_21-18-14.log
 ```
 
-franz-go API: api/v1/order-event
+* franz-go API: api/v1/order-event
 ```bash
 F1 Load Tester
 Running testAPIWithFranzKafka scenario for 2s at a rate of 1000/s constant rate, using distribution regular.
@@ -65,7 +61,8 @@ Full logs: /tmp/f1-testAPIWithFranzKafka-69bc-2024-08-01_21-17-49.log
 ```
 
 **Kafka Producers**
-confluent-kafka-go Producer
+
+* confluent-kafka-go Producer
 ```bash
 F1 Load Tester
 Running testConfluentKafkaProducer scenario for 2s at a rate of 1000/s constant rate, using distribution regular.
@@ -80,7 +77,7 @@ Successful Iterations: 2000 (100.00%, 1000/second) avg: 49.643657ms, min: 46.351
 Full logs: /tmp/f1-testConfluentKafkaProducer-f3d5-2024-08-01_21-18-44.log
 ```
 
-franz-go Producer
+* franz-go Producer
 ```bash
 F1 Load Tester
 Running testFranzKafkaProducer scenario for 2s at a rate of 1000/s constant rate, using distribution regular.
