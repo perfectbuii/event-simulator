@@ -65,9 +65,5 @@ func (sr *SchemaRegistry) SerializePayload(codec *goavro.Codec, payload map[stri
 		return nil, fmt.Errorf("failed to serialize payload: %w", err)
 	}
 
-	fmt.Printf("codec %+v\n", codec)
-	fmt.Printf("msg %+v\n", payload)
-	fmt.Printf("binary %+v\n", binary)
-
 	return binary, nil
 }
