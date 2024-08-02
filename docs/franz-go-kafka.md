@@ -169,20 +169,7 @@ func consumeMessages(client *kgo.Client) {
 
 ## Securing with TLS
 ### Generate Certificates
-Here's a brief guide on generating certificates using OpenSSL.
-
-```bash
-# Create a new private key for the CA
-openssl req -new -x509 -keyout ca-key.pem -out ca-cert.pem -days 365 -nodes -subj "/CN=MyCA"
-
-# Generate a new private key for the server
-openssl genrsa -out server-key.pem 2048
-
-# Create a certificate signing request (CSR) for the server
-openssl req -new -key server-key.pem -out server-csr.pem -subj "/CN=localhost"
-
-# Sign the server certificate with the CA
-openssl x509 -req -in server-csr.pem -CA ca-cert.pem -CAkey ca-key.pem -CAcreateserial -out server-cert.pem -days 365
+[Here](https://docs.redpanda.com/current/manage/security/encryption/) is a brief guide on generating certificates using OpenSSL.
 
 ```
 ### Configure TLS in franz-go
