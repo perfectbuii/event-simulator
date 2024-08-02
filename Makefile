@@ -1,11 +1,8 @@
-init-infra:
-	docker-compose down && docker-compose build --no-cache && docker-compose up -d
+build:
+	docker-compose down && docker-compose build --no-cache && docker-compose up -d && docker build -t myapp . && docker build -f test.Dockerfile -t f1-test-image .
 
 start-app:
-	docker build -t myapp . && docker run --rm --network host myapp
-
-build-test:
-	docker build -f test.Dockerfile -t f1-test-image .
+	docker run --rm --network host myapp
 
 franz-test-api:
 	./run-tests.sh franz-test-api

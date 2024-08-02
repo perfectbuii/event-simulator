@@ -101,14 +101,11 @@ Full logs: /tmp/f1-testFranzKafkaProducer-fc45-2024-08-01_21-19-14.log
 ## Usage 
 
 ```bash
-# init infra
-make init-infra
+# build
+make build
 
 # run app
 make start-app
-
-# build-test
-make build-test
 
 # run test
 make franz-test-api
