@@ -1,20 +1,20 @@
-franz-test-api:
-	docker build -f test.Dockerfile -t test . && docker run --rm --network host test run constant -r 1000/s -d 2s testAPIWithFranzKafka
-
-confluent-test-api:
-	gdocker build -f test.Dockerfile -t test . && docker run --rm --network host test run constant -r 1000/s -d 2s testAPIWithConfluentKafka
-
-franz-test-kafka:
-	docker build -f test.Dockerfile -t test . && docker run --rm --network host test run constant -r 1000/s -d 2s testFranzKafkaProducer 
-
-confluent-test-kafka:
-	docker build -f test.Dockerfile -t test . && docker run --rm --network host test run constant -r 1000/s -d 2s testConfluentKafkaProducer
-
-build:
+init-infra:
 	docker-compose down && docker-compose build --no-cache && docker-compose up
 
-start:
+start-app:
 	docker build -t myapp . && docker run --rm --network host myapp
 
-it:
-	docker build -f test.Dockerfile -t my-test-image . && docker run --rm --network host my-test-image
+build-test:
+	docker build -f test.Dockerfile -t f1-test-image .
+
+franz-test-api:
+	./run-tests.sh franz-test-api
+
+confluent-test-api:
+	./run-tests.sh confluent-test-api
+
+franz-test-kafka:
+	./run-tests.sh franz-test-kafka 
+
+confluent-test-kafka:
+	./run-tests.sh confluent-test-kafka

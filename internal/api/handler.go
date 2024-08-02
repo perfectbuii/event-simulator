@@ -3,7 +3,6 @@ package api
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/perfectbuii/event-simulator/internal/kafka"
@@ -49,7 +48,7 @@ func (h *APIHandler) ProduceMessageHandler(w http.ResponseWriter, r *http.Reques
 		http.Error(w, "Payload serialization failed", http.StatusBadRequest)
 		return
 	}
-	log.Printf("data %+v", msg)
+
 	// Produce the message to Kafka
 	if err := h.kafkaProducer.ProduceMessage(serializedData, h.topic); err != nil {
 		http.Error(w, "Failed to produce message", http.StatusInternalServerError)
