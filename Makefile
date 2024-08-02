@@ -1,5 +1,5 @@
 init-infra:
-	docker-compose down && docker-compose build --no-cache && docker-compose up
+	docker-compose down && docker-compose build --no-cache && docker-compose up -d
 
 start-app:
 	docker build -t myapp . && docker run --rm --network host myapp
