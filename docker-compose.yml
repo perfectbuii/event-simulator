@@ -30,6 +30,12 @@ services:
       - kafka-network
     volumes:
       - ./certs:/etc/redpanda/certs:ro
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'  # Limit to 1 CPU core
+          memory: 1.1G   # Limit memory usage to 1GB
+
     healthcheck:
       test: ["CMD", "rpk", "cluster", "info", "--brokers=localhost:9092","--tls-cert=/etc/redpanda/certs/broker.crt", "--tls-key=/etc/redpanda/certs/broker.key","--tls-truststore=/etc/redpanda/certs/ca.crt"]
       interval: 30s
@@ -55,23 +61,6 @@ services:
     entrypoint: ["sh", "-c", "sh /create-topics.sh && /register-schema.sh"]
     networks:
       - kafka-network
-
-  # myapp:
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - "8080:8080"
-  #   environment:
-  #     KAFKA_BROKERS: "redpanda:29092"
-  #     USER_EVENTS_TOPIC: "user-events"
-  #     ORDER_EVENTS_TOPIC: "order-events"
-  #     SCHEMA_REGISTRY_URL: "http://redpanda:8081"
-  #   depends_on:
-  #     redpanda:
-  #       condition: service_healthy
-  #   networks:
-  #     - kafka-network
 
   console:
     image: docker.redpanda.com/redpandadata/console:v2.6.0
