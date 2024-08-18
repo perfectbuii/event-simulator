@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Performance Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+            background-color: #1e1e1e; /* Dark background */
+            color: #e0e0e0; /* Light text color */
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #f5a623; /* Warm color for headings */
+        }
+        #tabs {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .tab {
+            display: inline-block;
+            margin-right: 10px;
+            padding: 10px 20px;
+            background-color: #333; /* Darker background for tabs */
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            color: #e0e0e0;
+            transition: background-color 0.3s;
+        }
+        .tab:hover {
+            background-color: #555; /* Lighter dark color on hover */
+        }
+        .active-tab {
+            background-color: #007bff; /* Highlight active tab */
+            color: white;
+        }
+        .tab-content {
+            display: none;
+        }
+        .active-tab-content {
+            display: block;
+        }
+        .chart-container {
+            margin-bottom: 20px;
+        }
+        .chart-container canvas {
+            width: 100%;
+            height: auto;
+            border-radius: 8px; /* Rounded corners for charts */
+            background-color: #333; /* Dark background for chart area */
+        }
+        .metrics {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            border: 2px solid #f5a623; /* Highlight border for active tab metrics */
+            padding: 15px;
+            border-radius: 10px;
+        }
+        .metrics div {
+            width: 18%;
+            min-width: 120px;
+            padding: 10px;
+            border: 1px solid #444; /* Dark border for metrics boxes */
+            border-radius: 5px;
+            text-align: center;
+            margin: 5px;
+            background-color: #444; /* Dark background for metrics boxes */
+            font-size: 14px;
+        }
+        .metrics h2 {
+            color: #f5a623; /* Warm color for metrics heading */
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .chart-row {
+            display: flex;
+            justify-content: space-evenly;
+            margin-bottom: 20px;
+        }
+        .chart-row > div {
+            width: 35%;
+            box-sizing: border-box;
+        }
+        .full-width-chart {
+            width: 50%;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .chart-container h3 {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>Performance Report</h1>
+    <div id="tabs">
+        {{range .Tabs}}
+        <div class="tab {{if eq .Tab $.ActiveTab}}active-tab{{end}}" onclick="showTab('{{.Tab}}')">{{.Tab}}</div>
+        {{end}}
+    </div>
+    {{range .Tabs}}
+    <div id="{{.Tab}}" class="tab-content {{if eq .Tab $.ActiveTab}}active-tab-content{{end}}">
+        <div class="metrics">
+            <div>Iteration Rate: {{printf "%.2f" .IterationRate}}</div>
+            <div>Request Rate: {{printf "%.2f" .RequestRate}}</div>
+            <div>Request Duration: {{printf "%.2f" .RequestDuration}}</div>
+            <div>Request Failed: {{printf "%.2f" .RequestFailed}}</div>
+            <div>Sent Rate: {{printf "%.2f" .SentRate}}</div>
+        </div>
+
+        <div class="chart-container full-width-chart">
+            <h3>Performance Review</h3>
+            <canvas id="{{.Tab}}-performance-chart"></canvas>
+        </div>
+
+        <div class="chart-row">
+            <div class="chart-container">
+                <h3>VUS</h3>
+                <canvas id="{{.Tab}}-vus-chart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3>Transfer Rate</h3>
+                <canvas id="{{.Tab}}-transfer-rate-chart"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-row">
+            <div class="chart-container">
+                <h3>Request Duration</h3>
+                <canvas id="{{.Tab}}-request-dur-chart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3>Iteration Duration</h3>
+                <canvas id="{{.Tab}}-iteration-dur-chart"></canvas>
+            </div>
+        </div>
+    </div>
+    {{end}}
+
+    <script>
+        function showTab(tabName) {
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(tab => {
+                tab.classList.remove('active-tab-content');
+            });
+            document.getElementById(tabName).classList.add('active-tab-content');
+            
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.classList.remove('active-tab');
+            });
+            document.querySelector(`.tab[onclick="showTab('${tabName}')"]`).classList.add('active-tab');
+        }
+
+        function createChart(canvasId, label, data, borderColor) {
+            const parsedData = JSON.parse(data); // Parse JSON string to JavaScript object
+            new Chart(document.getElementById(canvasId).getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: parsedData.labels,
+                    datasets: [{
+                        label: label,
+                        data: parsedData.values,
+                        borderColor: borderColor,
+                        borderWidth: 2,
+                        backgroundColor: `rgba(${hexToRgb(borderColor)}, 0.2)`, // Light color for the area under the line
+                        fill: true // Fill the area under the line
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                title: function() {
+                                    // Return empty string as we customize the body
+                                    return '';
+                                },
+                                label: function(tooltipItem) {
+                                    // Custom label for tooltips
+                                    const xValue = tooltipItem.label;
+                                    const yValue = tooltipItem.raw;
+
+                                    // Format yValue with /s suffix
+                                    const formattedYValue = `${yValue.toFixed(2)}/s`;
+                                    return `Rate: ${formattedYValue}, Time: ${xValue}`;
+                                },
+                                afterLabel: function() {
+                                    // Remove the default label with chart name and y value
+                                    return '';
+                                }
+                            },
+                            displayColors: false, // Hide color box in tooltip
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Time',
+                                color: '#e0e0e0'
+                            },
+                            ticks: {
+                                color: '#e0e0e0'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Rate',
+                                color: '#e0e0e0'
+                            },
+                            ticks: {
+                                color: '#e0e0e0',
+                                callback: function(value) {
+                                    // Format y-axis labels with /s suffix
+                                    return `${value.toFixed(2)}/s`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Helper function to convert hex color to rgb
+        function hexToRgb(hex) {
+            let r = 0, g = 0, b = 0;
+            // 3 digits
+            if (hex.length === 4) {
+                r = parseInt(hex[1] + hex[1], 16);
+                g = parseInt(hex[2] + hex[2], 16);
+                b = parseInt(hex[3] + hex[3], 16);
+            }
+            // 6 digits
+            else if (hex.length === 7) {
+                r = parseInt(hex[1] + hex[2], 16);
+                g = parseInt(hex[3] + hex[4], 16);
+                b = parseInt(hex[5] + hex[6], 16);
+            }
+            return `${r},${g},${b}`;
+        }
+
+        {{range .Tabs}}
+        createChart('{{.Tab}}-performance-chart', 'Performance', {{.PerformanceJS}}, 'rgba(75, 192, 192, 1)');
+        createChart('{{.Tab}}-vus-chart', 'VUS', {{.VUSJS}}, 'rgba(153, 102, 255, 1)');
+        createChart('{{.Tab}}-transfer-rate-chart', 'Transfer Rate', {{.TransferRateJS}}, 'rgba(255, 206, 86, 1)');
+        createChart('{{.Tab}}-request-dur-chart', 'Request Duration', {{.RequestDurJS}}, 'rgba(255, 99, 132, 1)');
+        createChart('{{.Tab}}-iteration-dur-chart', 'Iteration Duration', {{.IterationDurJS}}, 'rgba(54, 162, 235, 1)');
+        {{end}}
+
+        showTab('{{.ActiveTab}}');
+    </script>
+</body>
+</html>

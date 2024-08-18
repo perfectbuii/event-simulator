@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Performance Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+            background-color: #1e1e1e;  
+            color: #e0e0e0;  
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #f5a623;  
+        }
+        #tabs {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .tab {
+            display: inline-block;
+            margin-right: 10px;
+            padding: 10px 20px;
+            background-color: #333;  
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            color: #e0e0e0;
+            transition: background-color 0.3s;
+        }
+        .tab:hover {
+            background-color: #555;  
+        }
+        .active-tab {
+            background-color: #007bff;  
+            color: white;
+        }
+        .tab-content {
+            display: none;
+        }
+        .active-tab-content {
+            display: block;
+        }
+        .chart-container {
+            margin-bottom: 20px;
+        }
+        .chart-container canvas {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;  
+            background-color: #333;  
+        }
+        .metrics {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            border: 2px solid #f5a623;  
+            padding: 15px;
+            border-radius: 10px;
+        }
+        .metrics div {
+            width: 18%;
+            min-width: 120px;
+            padding: 10px;
+            border: 1px solid #444;  
+            border-radius: 5px;
+            text-align: center;
+            margin: 5px;
+            background-color: #444;  
+            font-size: 14px;
+        }
+        .metrics h2 {
+            color: #f5a623;  
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .chart-row {
+            display: flex;
+            justify-content: space-evenly;
+            margin-bottom: 20px;
+        }
+        .chart-row > div {
+            width: 35%;
+            box-sizing: border-box;
+        }
+        .full-width-chart {
+            width: 50%;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .chart-container h3 {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>Performance Report</h1>
+    <div id="tabs">
+        
+        <div class="tab active-tab" onclick="showTab('HTTP')">HTTP</div>
+        
+        <div class="tab " onclick="showTab('GRPC')">GRPC</div>
+        
+        <div class="tab " onclick="showTab('Kafka')">Kafka</div>
+        
+    </div>
+    
+    <div id="HTTP" class="tab-content active-tab-content">
+        <div class="metrics">
+            <div>Iteration Rate: 67.44</div>
+            <div>Request Rate: 163.33</div>
+            <div>Request Duration: 219.63</div>
+            <div>Request Failed: 6.01</div>
+            <div>Sent Rate: 563.47</div>
+        </div>
+
+        <div class="chart-container full-width-chart">
+            <h3>Performance Review</h3>
+            <canvas id="HTTP-performance-chart"></canvas>
+        </div>
+
+        <div class="chart-row">
+            <div class="chart-container">
+                <h3>VUS</h3>
+                <canvas id="HTTP-vus-chart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3>Transfer Rate</h3>
+                <canvas id="HTTP-transfer-rate-chart"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-row">
+            <div class="chart-container">
+                <h3>Request Duration</h3>
+                <canvas id="HTTP-request-dur-chart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3>Iteration Duration</h3>
+                <canvas id="HTTP-iteration-dur-chart"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div id="GRPC" class="tab-content ">
+        <div class="metrics">
+            <div>Iteration Rate: 84.12</div>
+            <div>Request Rate: 256.36</div>
+            <div>Request Duration: 391.98</div>
+            <div>Request Failed: 8.04</div>
+            <div>Sent Rate: 582.86</div>
+        </div>
+
+        <div class="chart-container full-width-chart">
+            <h3>Performance Review</h3>
+            <canvas id="GRPC-performance-chart"></canvas>
+        </div>
+
+        <div class="chart-row">
+            <div class="chart-container">
+                <h3>VUS</h3>
+                <canvas id="GRPC-vus-chart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3>Transfer Rate</h3>
+                <canvas id="GRPC-transfer-rate-chart"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-row">
+            <div class="chart-container">
+                <h3>Request Duration</h3>
+                <canvas id="GRPC-request-dur-chart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3>Iteration Duration</h3>
+                <canvas id="GRPC-iteration-dur-chart"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div id="Kafka" class="tab-content ">
+        <div class="metrics">
+            <div>Iteration Rate: 59.06</div>
+            <div>Request Rate: 220.40</div>
+            <div>Request Duration: 284.79</div>
+            <div>Request Failed: 3.25</div>
+            <div>Sent Rate: 519.80</div>
+        </div>
+
+        <div class="chart-container full-width-chart">
+            <h3>Performance Review</h3>
+            <canvas id="Kafka-performance-chart"></canvas>
+        </div>
+
+        <div class="chart-row">
+            <div class="chart-container">
+                <h3>VUS</h3>
+                <canvas id="Kafka-vus-chart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3>Transfer Rate</h3>
+                <canvas id="Kafka-transfer-rate-chart"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-row">
+            <div class="chart-container">
+                <h3>Request Duration</h3>
+                <canvas id="Kafka-request-dur-chart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3>Iteration Duration</h3>
+                <canvas id="Kafka-iteration-dur-chart"></canvas>
+            </div>
+        </div>
+    </div>
+    
+
+    <script>
+        function showTab(tabName) {
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(tab => {
+                tab.classList.remove('active-tab-content');
+            });
+            document.getElementById(tabName).classList.add('active-tab-content');
+            
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.classList.remove('active-tab');
+            });
+            document.querySelector(`.tab[onclick="showTab('${tabName}')"]`).classList.add('active-tab');
+        }
+
+        function createChart(canvasId, label, data, borderColor) {
+            const parsedData = JSON.parse(data); 
+            new Chart(document.getElementById(canvasId).getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: parsedData.labels,
+                    datasets: [{
+                        label: label,
+                        data: parsedData.values,
+                        borderColor: borderColor,
+                        borderWidth: 2,
+                        backgroundColor: `rgba(${hexToRgb(borderColor)}, 0.2)`, 
+                        fill: true 
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                title: function() {
+                                    
+                                    return '';
+                                },
+                                label: function(tooltipItem) {
+                                    
+                                    const xValue = tooltipItem.label;
+                                    const yValue = tooltipItem.raw;
+
+                                    
+                                    const formattedYValue = `${yValue.toFixed(2)}/s`;
+                                    return `Rate: ${formattedYValue}, Time: ${xValue}`;
+                                },
+                                afterLabel: function() {
+                                    
+                                    return '';
+                                }
+                            },
+                            displayColors: false, 
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Time',
+                                color: '#e0e0e0'
+                            },
+                            ticks: {
+                                color: '#e0e0e0'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Rate',
+                                color: '#e0e0e0'
+                            },
+                            ticks: {
+                                color: '#e0e0e0',
+                                callback: function(value) {
+                                    
+                                    return `${value.toFixed(2)}/s`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        
+        function hexToRgb(hex) {
+            let r = 0, g = 0, b = 0;
+            
+            if (hex.length === 4) {
+                r = parseInt(hex[1] + hex[1], 16);
+                g = parseInt(hex[2] + hex[2], 16);
+                b = parseInt(hex[3] + hex[3], 16);
+            }
+            
+            else if (hex.length === 7) {
+                r = parseInt(hex[1] + hex[2], 16);
+                g = parseInt(hex[3] + hex[4], 16);
+                b = parseInt(hex[5] + hex[6], 16);
+            }
+            return `${r},${g},${b}`;
+        }
+
+        
+        createChart('HTTP-performance-chart', 'Performance', "{\"labels\":[0,1,2,3,4,5,6,7,8,9],\"values\":[25.156975339525644,56.33884945868303,80.167596786877,35.290183710613896,72.29628254416548,11.13791413138715,20.489705177789386,23.15115140024919,90.400943475816,1.698837812838161]}", 'rgba(75, 192, 192, 1)');
+        createChart('HTTP-vus-chart', 'VUS', "{\"labels\":[0,1,2,3,4,5,6,7,8,9],\"values\":[49.42219275363926,46.66341166537432,57.26269941443544,57.85113360120582,93.79790942374593,20.791080317321597,21.508938120796007,21.459431697185995,47.08324517488167,20.90227400539678]}", 'rgba(153, 102, 255, 1)');
+        createChart('HTTP-transfer-rate-chart', 'Transfer Rate', "{\"labels\":[0,1,2,3,4,5,6,7,8,9],\"values\":[96.95493719704056,74.16747586212313,10.93682080501529,73.50287283708874,75.87521525040013,31.603827256822182,10.194826099146425,92.21066682057219,40.7930649748698,25.33149272706513]}", 'rgba(255, 206, 86, 1)');
+        createChart('HTTP-request-dur-chart', 'Request Duration', "{\"labels\":[0,1,2,3,4,5,6,7,8,9],\"values\":[38.58913261704181,80.84777025589777,26.1336730615739,92.49392895076242,64.79669265267046,43.60431299095462,91.52442081907066,83.37753612836019,87.32675717798597,32.910296994579916]}", 'rgba(255, 99, 132, 1)');
+        createChart('HTTP-iteration-dur-chart', 'Iteration Duration', "{\"labels\":[0,1,2,3,4,5,6,7,8,9],\"values\":[35.77333975122981,31.75874405136763,53.89638486084463,16.252791357566753,61.34777629269833,65.65725300791782,45.656011517624485,93.3335773230409,34.48589414955493,73.68901838280883]}", 'rgba(54, 162, 235, 1)');
+        
+        createChart('GRPC-performance-chart', 'Performance', "{\"labels\":[0,1,2,3,4,5,6,7,8,9],\"values\":[26.43765089539718,69.28523448118693,69.68317615048977,2.501184203324558,38.901590479105565,22.77846545786797,48.14242180976114,1.2469576206197042,48.06855281845343,31.35475337693897]}", 'rgba(75, 192, 192, 1)');
+        createChart('GRPC-vus-chart', 'VUS', "{\"labels\":[0,1,2,3,4,5,6,7,8,9],\"values\":[56.45185737005981,87.56056153633773,39.257999883598394,85.3192236127864,76.68522635649906,26.533505377984635,75.95724725011958,80.31947576656691,22.953243699284563,79.45939310041489]}", 'rgba(153, 102, 255, 1)');
+        createChart('GRPC-transfer-rate-chart', 'Transfer Rate', "{\"labels\":[0,1,2,3,4,5,6,7,8,9],\"values\":[57.37257322852628,84.70777543031059,64.01983500667217,36.59044063217438,93.89057724031554,89.3580853882862,50.64620956819541,51.35932920674502,97.45168743305565,68.35343133698093]}", 'rgba(255, 206, 86, 1)');
+        createChart('GRPC-request-dur-chart', 'Request Duration', "{\"labels\":[0,1,2,3,4,5,6,7,8,9],\"values\":[61.597932620816295,40.0791056872057,66.60565848515797,29.77413506043767,48.33213540330122,71.26764823777367,40.11294114701642,78.30653117558887,88.72049136960939,87.04781346186107]}", 'rgba(255, 99, 132, 1)');
+        createChart('GRPC-iteration-dur-chart', 'Iteration Duration', "{\"labels\":[0,1,2,3,4,5,6,7,8,9],\"values\":[24.46129274573311,84.7663538683578,86.53632172699369,75.6275175428042,16.471704861301173,73.93905793777297,9.838155315960917,7.604728381693693,6.392654255954566,15.388365994465381]}", 'rgba(54, 162, 235, 1)');
+        
+        createChart('Kafka-performance-chart', 'Performance', "{\"labels\":[0,1,2,3,4,5,6,7,8,9],\"values\":[52.625792540482195,37.88872787413897,40.563804534953555,99.3642027938598,47.409501142511154,33.86038509259022,48.72474871072219,3.0851281533754937,59.055365080151354,73.12134751040247]}", 'rgba(75, 192, 192, 1)');
+        createChart('Kafka-vus-chart', 'VUS', "{\"labels\":[0,1,2,3,4,5,6,7,8,9],\"values\":[78.72311497728651,88.26418553123224,39.623624066783826,27.019693580718595,91.82192569451318,86.4648025708216,12.496438171061886,67.74134711945585,4.954572167242199,38.6308207858063]}", 'rgba(153, 102, 255, 1)');
+        createChart('Kafka-transfer-rate-chart', 'Transfer Rate', "{\"labels\":[0,1,2,3,4,5,6,7,8,9],\"values\":[1.2236695097142203,85.72500677684506,73.38932635753707,91.06343364412558,88.96217026710866,53.99523353667273,34.40118112264147,10.78552328918948,9.232274955188934,7.779182169863308]}", 'rgba(255, 206, 86, 1)');
+        createChart('Kafka-request-dur-chart', 'Request Duration', "{\"labels\":[0,1,2,3,4,5,6,7,8,9],\"values\":[93.10186588637794,72.30514068662634,50.70426347747308,32.059388740821824,87.8537857756747,79.1540920985052,1.6902209418525938,19.59507591028994,67.54583173318454,92.19330638799248]}", 'rgba(255, 99, 132, 1)');
+        createChart('Kafka-iteration-dur-chart', 'Iteration Duration', "{\"labels\":[0,1,2,3,4,5,6,7,8,9],\"values\":[98.98665870885685,44.57065086278049,10.35783978719419,67.04075073691527,56.455225851633614,57.59146264946684,67.04209630229171,96.13531830216982,82.38286257474688,12.325441805772975]}", 'rgba(54, 162, 235, 1)');
+        
+
+        showTab('HTTP');
+    </script>
+</body>
+</html>
